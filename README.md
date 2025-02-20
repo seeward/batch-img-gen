@@ -34,6 +34,10 @@ The script uses several command-line arguments to control its behavior:
   The number of times the prompt will be used to generate images in batch mode.  
   _Default:_ `1`
 
+- `--batch`: Make images as many as count
+
+- `--subject`: Generate prompts for this subject in batches
+
 ---
 
 ## Usage Examples
