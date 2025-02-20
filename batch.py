@@ -1,0 +1,130 @@
+import os
+import torch
+import argparse
+import time
+import random
+from diffusers import DiffusionPipeline
+
+mediums = ['gouache painting','ink wash painting','sumi-e art','block printing','marbling art','scraperboard','tempera painting','fresco painting','encaustic art','glow-in-the-dark art','digital collage','kinetic art','holographic art','cyberpunk style','steampunk style','art nouveau style','art deco style','baroque style','cubist style','futuristic cityscape','medieval manuscript illustration','Renaissance style painting','Impressionist landscape','Surrealist scene','Abstract expressionist painting','Minimalist design','Pop art style','Urban sketch','Concept sketch','Fashion illustration','Architectural rendering','Cave painting style','Hieroglyphic style','Silhouette illustration','Blueprint style','Pointillism','Graffiti art','Caricature','Comic strip','Storyboard art','Zentangle art','Papercraft','Book illustration','Medical illustration','Scientific illustration','Botanical illustration','Ornamental design','Geometric patterns','Folk art style','Tapestry design','Ceramic pattern','Enamel art','Jewelry design','Origami style','Shadow art','Interactive digital art','360-degree panoramic photography','High dynamic range (HDR) photography','Macro photography','Aerial photography','Infrared photography','beautiful flat 2 dimensional illustration','cel shaded','silk screen','digital portrait','inspirational landscape','contemporary art','poster art','shaded lighting poster','digital art','digital painting','dream','fantasy','oil painting','pencil drawing','2 d illustration','detailed line art','concept art','digital art','watercolor painting','charcoal sketch','acrylic painting','etching','photorealistic rendering','mixed media','collage','pastel drawing','vector illustration','3D render','clay sculpture','paper cutout','stained glass design','graphic novel style','manga panels','stop motion','animation frame','woodcut print','lithography','spray paint mural','textile pattern','sand animation','chalk art','LED display style','mosaic','neon light art','metal engraving','miniature painting','artistic map','photocollage','glass art','batik design','pixel art','airbrush','sepia tone photography','textured oil painting','hand-drawn animation','thermal imaging style','graphic poster','embroidery design']
+artists = ['Peter Max','Roy Lichtenstein','Romero Britto','Keith Haring','Hiroshige','Joan Miró','Jean-Michel Basquiat','Katsushika Hokusai','Paul Klee','Marc Chagall','Karl Schmidt-Rottluff','Howard Hodgkin','Jean Metzinger','Alma Thomas','Rufino Tamayo','Utagawa Hiroshige','Chagall','Harumi Hironaka','Hans Hofmann','Kawanabe Kyōsai','Andy Warhol','Barbara Takenaga','Tatsuro Kiuchi','Vincent Van Gogh','Wassily Kandinsky','Georges Seurat','Karel Appel','Sonia Delaunay','Hokusai','Eduardo Kobra','Milton Avery','David Hockney','Hiroshi Nagai','Aristarkh Lentulov','Lyonel Feininger','Mary Blair','Ellsworth Kelly','Jun Kaneko','Roz Chast','Ida Rentoul Outhwaite','Robert Motherwell','Garry Winogrand','Alexander Calder','Tomokazu Matsuyama','August Macke','Kazimir Malevich','Richard Scarry','Victor Vasarely','Kitagawa Utamaro','Matt Bors','Emil Nolde','Patrick Caulfield','Charles Blackman','Peter Doig','Alexej von Jawlensky','Rumiko Takahashi','Eileen Agar','Ernst Ludwig Kirchner','Nicolas Delort','Marsden Hartley','Keith Negley','Jamini Roy','Quentin Blake','Andy Kehoe','Frans Masereel','Umberto Boccioni','Conrad Roset','Paul Ranson','Yayoi Kusama','Tomi Ungerer','Saul Steinberg','Jon Klassen','Helen Frankenthaler','Jean Jullien','Brett Whiteley','Takashi Murakami','Howard Finster','Eduardo Paolozzi','Charles Rennie Mackintosh','Brandon Mably','Rebecca Louise Law','Victo Ngai','Hanabusa Itchō II','Edmund Dulac','Ben Shahn','Howard Arkley','Wilfredo Lam','Michael Deforge','Francesco Clemente','Leonetto Cappiello','Norman Ackroyd','Bhupen Khakhar','Jeremiah Ketner','Chris Ofili','Banksy','Tom Whalen','Ernst Wilhelm Nay','Henri Rousseau','Kunisada','Naoko Takeuchi','Kaethe Butcher','Hasui Kawase','Alvin Langdon Coburn','Stanley Donwood','Agnes Martin','Osamu Tezuka','Frank Stella','Evgeni Gordiets','Alasdair Gray','Yasuo Kuniyoshi','Edward Gorey','Johannes Itten','Cuno Amiet','M.C. Escher','Albert Irvin','Jack Gaughan','Ravi Zupa','Kay Nielsen','Alessandro Gottardo','Paul Laffoley','Adrian Tomine','Adolph Gottlieb','Milton Caniff','Philip Guston','Debbie Criswell','Alice Pasquini','Lisa Frank','Patrick Heron','Cézanne','Tristan Eaton','Jillian Tamaki','Takato Yamamoto','Martiros Saryan','Emil Orlik','Armand Guillaumin','Jane Newland','Paul Cézanne','Tove Jansson','Guido Crepax','OSGEMEOS','Albert Watson','Emory Douglas','Ohara Koson','Nicolas de Stael','Aubrey Beardsley','Hishikawa Moronobu','Alfred Wallis','Friedensreich Hundertwasser','Eyvind Earle','Karl Blossfeldt','Duy Huynh','Barry McGee','William Kentridge','Alexander Archipenko','Jaume Plensa','Alberto Vargas','Jean Dubuffet','Yves Tanguy','Georgia O’Keeffe','Georgia O Keeffe','Henri Cartier-Bresson','Mark Rothko','Bruce Gilden','Gino Severini','Alena Aenami','Apollonia Saintclair','László Moholy-Nagy','David Wojnarowicz','Tara McPherson','Patricia Polacco','Gabriele Münter','David Inshaw','Maurice Sendak','Harry Clarke','Jamie Hewlett','Steve Ditko','Annie Soudain','Albert Gleizes','Alain Laboile','Yue Minjun','Art Spiegelman','Mordecai Ardon','Milton Glaser','Eishōsai Chōki','Bruce McLean','Jacob Lawrence','Alex Katz','Henri de Toulouse-Lautrec','Franz Sedlacek','Paul Lehr','Nicholas Roerich','Henri Matisse','Colin McCahon','Max Dupain','Stephen Gammell','Alberto Giacometti','Goyō Hashiguchi','Butcher Billy','Gaetano Pesce','Winsor McCay','Claude Cahun','Roger Ballen','Ellen Gallagher','Franz Kline','André Kertész','Hans Hartung','Paul Gauguin','Etel Adnan','Barbara Kruger','Franz Marc','Saul Bass','El Lissitzky','David Young Cameron','W. Heath Robinson','Emily Kame Kngwarreye','Charline von Heyl','Frida Kahlo','Amy Sillman','Emperor Huizong of Song','Brett Weston','Charles E. Burchfield','Elaine de Kooning','Gary Panter','Frederick Hammersley','Hannah Hoch','Shepard Fairey','Richard Burlet','Bill Brandt','Herbert List','Joseph Cornell','Nathan Wirth','John Kenn Mortensen','Albert Robida','Shintaro Kago','Sidney Nolan','Brian Stelfreeze','Honoré Daumier','Edvard Munch','Victor Brauner','Naoki Urasawa','Kilian Eng','Katsuhiro Otomo','Jeanloup Sieff','William Zorach','Natalia Goncharova','August Sander','Jasper Johns','Arthur Dove','Darwyn Cooke','Jeff Lemire','Al Williamson','Alphonse Mucha','Cleon Peterson','Fernando Botero','Ben Nicholson','David Wiesner','Jean Arp','Andre Kertesz','Hugh Ferriss','Agnes Lawrence Pelton','Charles Camoin','Paul Strand','Charles Gwathmey','Oskar Kokoschka','Bruno Munari','Willem de Kooning','Hiroshi Yoshida','David Bowie','Antanas Sutkus','Leonora Carrington','Hieronymus Bosch','A. J. Casson','Chaim Soutine','Artur Bordalo','Philippe Druillet','Hieronim Bosch','Nick Sharratt','Fernand Léger','Hieronymous Bosch','Charles Addams','Studio Ghibli','Archibald Motley','Anton Fadeev','Uemura Shoen','Ando Fuchs','Alex Garant','Lawren Harris','Anne Truitt','Richard Lindner','Sailor Moon','Bridget Bate Tichenor','Ralph Steadman','Abigail Larson','Bill Traylor','David Burliuk','Catrin Welz-Stein','William Etty','Pierre Bonnard','Benoit B. Mandelbrot','Karel Thole','Andre Derain','Beauford Delaney','Ruth Bernhard','David Alfaro Siqueiros','Carl Larsson','Henri De Toulouse Lautrec','Shotaro Ishinomori','Hope Gangloff','Julie Blackmon','William Steig','Octavio Ocampo','Cy Twombly','Daniela Uhlig','Go Nagai','Josef Albers','André Masson','John Wayne Gacy','Herbert Bayer','Liam Wong','Chaïm Soutine','Rockwell Kent','Ed Mell','Ismail Inceoglu','Arthur Lismer','Aaron Siskind','Rebecca Guay','Martin Kippenberger','Diego Giacometti','Dmitry Kustanovich','Dora Carrington','Shusei Nagaoko','Odilon Redon','Shohei Otomo','Barnett Newman','Gustav Klimt','Bonnard Pierre','Mao Hamaguchi','George Baselitz','Asaf Hanuka','Nicola Samori','Hermenegildo Anglada Camarasa','Pablo Picasso','Howard Chaykin','Ferdinand Hodler','Lyubov Popova','Piet Mondrian','Gertrude Abercrombie','David Driskell','Paula Modersohn-Becker','Junji Ito','Chiho Aoshima','Amedeo Modigliani','Roberto Ferri','Affandi','Hilma AF Klint','Hilma af Klint','Chris Ware','Marius Borgeaud','M.W. Kaluta','Charles Demuth','Coles Phillips','Antonio Saura','Anselm Kiefer','Remedios Varo','Franz Hegi','Kati Horna','Arshile Gorky','David LaChapelle','Fritz von Dardel','Sally Mann','Alfonse Mucha','Damien Hirst','Lee Krasner','Dorothea Lange','Juan Gris','Asger Jorn','Peter Wileman','Chen Hongshou','Catherine Hyde','Jackson Pollock','John Bratby','Christopher Balaskas','Alexander Rodchenko','Mikalojus Konstantinas Ciurlionis','Paul Delvaux','Francesco del Cossa','Isaac Cordal','Hikari Shimoda','Bernard Buffet','Auguste Herbin','Diane Dillon','Hans Erni','Richard Diebenkorn','E. H. Shepard','Hsiao-Ron Cheng','Raina Telgemeier','James Ensor','Tsutomu Nihei','Dan Hillier','Olivier Bonhomme','Edward Weston','Germaine Krull','Georg Baselitz','Anne Rothenstein','Anne Packard','Fujiwara Takanobu','Elliott Erwitt','Rene Magritte','Gerda Wegener','Graham Sutherland','George Herriman','Peter Bagge','Jeffrey Catherine Jones','Alexander Millar','André Derain','Laurie Greasley','Cecil Beaton','Gustaf Tenggren','Abdur Rahman Chughtai','Constantin Brancusi','Chantal Joffe','Yoshiyuki Tomino','Pieter Bruegel The Elder','Edward Steichen','Bert Stern','Kentaro Miura','Georges Rouault','Anne-Louis Girodet','Bert Hardy','Inio Asano','Albert Bloch','Ernst Fuchs','Judy Chicago','Frances Macdonald','Frances MacDonald','Hannah Höch','Terada Katsuya','David Firth','Jim Mahfood','Ossip Zadkine','Ken Sugimori','Alexander Jansson','Anne Brigman','Emiliano Ponzi','Tamara Lempicka','Carl Barks','André Lhote','Paul Corfield','Hirohiko Araki','Simon Stalenhag','Thomas W Schaller','NHK Animation','Euan Uglow','Billy Childish','Ed Paschke','Francis Bacon','Egon Schiele','Max Beckmann','Edward Hopper','Herb Ritts','Susan Seddon Boulet','Allen Jones','Gyoshū Hayami','Cyril Rolando','Duncan Grant','Geof Darrow','Brian Bolland','James Gilleard','David Choe','Gatōken Shunshi','Aron Wiesenfeld','Kelly Vivanco','Neil Welliver','Sandra Chevrier','Richard McGuire','Alison Bechdel','Hanabusa Itchō','Gary Larson','Hayao Miyazaki','Francis Picabia','Man Ray','Alice Rahon','Gustave Van de Woestijne','Gabriel Ba','Barry Windsor Smith','Takeshi Obata','Makoto Shinkai','Hervé Guibert','Fujishima Takeji','Georges Braque','Atey Ghailan','theCHAMBA','George Tooker','Faith Ringgold','Hans Bellmer','Joe Fenton','Baiōken Eishun','John Stezaker','Alice Neel','Miho Hirano','Alfred Eisenstaedt','Herbert MacNair','Becky Cloonan','Hein Gorny','Bakemono Zukushi','Paul Wonner','Emil Alzamora','Lois van Baarle','Arthur Garfield Dove','José Clemente Orozco','Don Bluth','Aristide Maillol','Otto Dix','William Gropper','Mab Graves','Pixar Concept Artists','Alberto Burri','Awataguchi Takamitsu','Todd McFarlane','Tomer Hanuka','Anne Redpath','Akira Toriyama','Toei Animations','Peter De Seve','Hasegawa Tōhaku','Leiji Matsumoto','Carne Griffiths','Will Barnet','Masaaki Sasamoto','Salvador Dali','Steve Lieber','Genndy Tartakovsky','Hanna-Barbera','Max Pechstein','Arnold Franz Brasz','Craola','Benjamin Marra','Satoshi Kon','Masamune Shirow','Hariton Pushwagner','Ethan Van Sciver','Roger Dean','Bryan Hitch','Fernand Khnopff','Charles Vess','Carlo Galli Bibiena','Josan Gonzalez','Edward Wadsworth','Pixar','Rebecca Sugar','Dustin Nguyen','Raymond Duchamp-Villon','Posuka Demizu','Andy Fairhurst','Bruce Timm','Harvey Kurtzman','Eiichiro Oda','Kim Jung Gi','Milo Manara','Phil Noto','Kaws','Jack Kirby','H. R. Giger','David Aja','William Wegman','Dave McKean','Hiromu Arakawa','Siya Oum','Mike Mignola','Brian K. Vaughan','Klaus Janson','Heinz Edelmann','Botero','Anna Bocek','Chip Zdarsky','Joe Madureira','Alex Grey','Goro Fujita','Taiyō Matsumoto','Adam Martinakis','Will Eisner','Saturno Butto','Balthus','Ernie Barnes','Brian Kesinger','Fyodor Vasilyev','Ub Iwerks','Afarin Sajedi','Kobayashi Kiyochika','John Philip Falter','Anna Dittmann','Lucian Freud','Frank Auerbach','Marc Davis','William-Adolphe Bouguereau','Cory Loftis','Alex Hirsch','Georges Lemmen','Gai Qi','Dali','Shinji Aramaki','Bapu','Tony DiTerlizzi','Michael Cheval','Boris Grigoriev','Tex Avery','Adam Hughes','Frank Lloyd Wright','Brooke DiDonato','Phil Jimenez','Gao Cen','Mike Deodato','Casey Weldon','Maginel Wright Enright Barney','Hajime Sorayama','Glen Keane','Albert Servaes','Yasushi Nirasawa','Frank Frazetta','Charlie Bowater','Emmanuel Shiu','Henry Moore','Armin Hansen','Jessica Rossier','Jeff Kinney','Derek Gores','Albert Benois','Krenz Cushart','Akihiko Yoshida','Bastien L. Deharme','Matt Fraction','Dan Mumford','Bart Sears','Genevieve Springston Lynch','Robert Irwin','Ilya Kuvshinov','Cassius Marcellus Coolidge','Greg Rutkowski','Ike no Taiga','Mike Mayhew','JennyBird Alcantara','Fyodor Slavyansky','Seb Mckinnon','Evgeny Lushpin','Howard Chandler Christy','Henri Biva','Harvey Pratt','Caroline Lucy Scott','Béla Iványi-Grünwald','Dr. Seuss','Andre Kohn','Ron Mueck','Edward Corbett','Eugeniusz Żak','Ruan Jia','Darek Zabrocki','Thomas Saliot','Francesco Cozza','Anna Razumovskaya','Aleksander Orłowski','Alejandro Burdisio','Richard Hamilton','Alfred Kelsner','Ross Tran','Skottie Young','Andreas Rocha','Frank DuMond','David Burton-Richardson','Albert Bertelsen','Aert de Gelder','Adonna Khare','James Stokoe','Conrad Marca-Relli','Yoji Shinkawa','Du Jin','Harry Shoulberg','E. William Gollings','Bo Bartlett','Hans Burgkmair','David Macaulay','Benedetto Caliari','Eliott Lilly','Vincent Tanguay','Christopher Wood','Margaux Valonia','Jhonen Vasquez','Jacques Nathan-Garamond','Eddie Mendoza','Grzegorz Rutkowski','Giorgio Cavallon','Godfrey Blow','Emile Lahner','Steve Dillon','Hale Woodruff','Tom Hammick','Hamilton Sloan','Caesar Andrade Faini','Sam Spratt','Alejandro Obregón','Dan Flavin','Elenore Abbott','Andrea Kowch','Demetrios Farmakopoulos','Lesley Vance','Abraham Begeyn','Charles Mozley','Herman van Swanevelt','David Paton','Hans Werner Schmidt','Balcomb Greene','Glen Angus','Buckminster Fuller','Almeida Júnior','Hans Beat Wieland','Jakub Różalski','John Whitcomb','Dorothy King','Aniello Falcone','Henning Jakob Henrik Lund','Robert M Cunningham','Nick Knight','David Chipperfield','Bartolomeo Cesi','Bettina Heinen-Ayech','Annabel Kidston','Charles Schridde','Samuel Earp','Eugene Montgomery','Alfred Parsons','Anton Möller','Craig Davison','Celia Fiennes','Howard Knotts','Helmut Federle','Elwood H. Smith','Annabel Eyres','Zack Snyder','Gentile Bellini','Giovanni Pelliccioli','Fikret Muallâ Saygı','Charles Williams','Georg Arnold-Graboné','Fedot Sychkov','Alberto Magnelli','Aloysius O Kelly','Alexander McQueen','Cam Sykes','George Lucas','Eglon van der Neer','Christian August Lorentzen','Eleanor Best','Flora Borsi','Berndnaut Smilde','Ernő Tibor','Ancell Stronach','Anita Malfatti','Arnold Brügger','Edward Ben Avram','Alyssa Monks','Chen Zhen','Francis Helps','Georg Karl Pfahler','Henry Woods','Barbara Greg','Guy Billout','Basuki Abdullah','Thomas Visscher','Edward Simmons','Arabella Rankin','Christopher Williams','Edward Baird','Georges Stein','Emanuel Schongut','Hans Bol','Kurzgesagt','Harald Giersing','Carl Rahl','Americo Makk','Fernand Pelez','Caspar Netscher','Walt Disney','Geoffrey Dyer','Andre Norton','Daphne McClure','Hugo Scheiber','Carl-Henning Pedersen','Alison Debenham','Eppo Doeve','Christen Købke','Aron Demetz','Alesso Baldovinetti','David Cooke Gibson','Howard Butterworth','Abdel Hadi Al Gazzar','Gu Zhengyi','Aleksander Kotsis','Alexander Sharpe Ross','Carlos Enríquez Gómez','Abed Abdi','Elaine Duillo','Anne Said','Istvan Banyai','Bouchta El Hayani','George Claessen','Axel Törneman','Avigdor Arikha','Gloria Stoll Karn','Alfredo Volpi','Raffaello Sanizo','Jeff Easley','Aileen Eagleton','Gaetano Sabatini','Bertalan Pór','Alfred Jensen','Emil Ferris','Derek Chittock','Alonso Vázquez','Kelly Sue Deconnick','Edward George Handel Lucas','Dorothea Braby','Heinz Edelman','Mark Seliger','Dong Kingman','Douglas Robertson Bisset','Blek Le Rat','Olafur Eliasson','Elinor Proby Adams','Cándido López','D. Howard Hitchcock','Jean Nouvel','Bill Gekas','Hermione Hammond','Fernando Gerassi','Frank Barrington Craig','A. B. Jackson','Bernie D’Andrea','Clarice Beckett','Dosso Dossi','Donald Roller Wilson','Ernest William Christmas','Aleksandr Gerasimov','Edward Clark','Georg Schrimpf','John Wilhelm','Aries Moross','Bill Lewis','Albert Tucker','Anne Ryan','Helen Edwards','Alexander Bogen','David Annand','Fred Cress','David B. Mattingly','Hristofor Žefarović','Alexander Fedosav','Anne Rigney','Bertalan Karlovszky','Eugeen Van Mieghem','Alexei Harlamoff','Jeff Legg','Elizabeth Murray','Hugo Heyrman','Adrian Paul Allinson','Altoon Sultan','Harriet Powers','Aaron Bohrod','Clara Miller Burd','Iwan Baan','Anatoly Metlan','Alfons von Czibulka','Amedee Ozenfant','Valerie Hegarty','Hugo Anton Fisher','Antonio Roybal','Julien Delval','Marcin Jakubowski','Anne Stokes','Hallsteinn Sigurðsson','Mike Campau','Giuseppe Avanzi','Harry Morley','Constance-Anne Parker','Albert Keller','Daniel Chodowiecki','Alasdair Grant Taylor','Ernő Bánk','Shaddy Safadi','André Castro','Allen Williams','Anna Haifisch','Clovis Trouille','Jane Graverol','Conroy Maddox','Božidar Jakac','George Morrison','Douglas Bourgeois']
+finishing_touches = ['surrealism','pixiv','dramatic','highly detailed','concept art','arthouse','bold clear lines','cyberpunk style','intricate','unreal engine','calm and serene','volumetric lighting and shadows','trending on art station','triadic color scheme','smooth','axonometric','vast','epic','wide','cel shaded','psychedelic','shamanic','sharp','focus','raw','beautiful','sunny','high contrast','green grass','featured on pixiv','sharp focus','unreal engine lumen','matte','elegant','the most beautiful image ever seen','illustration','digital paint','god rays','octane render','8k','studio light','4k','vibrant','bright','soft light','washed colors','sharp','superflat','golden hour','dramatic lighting','beautiful','post processing','picture of the day','ambient lighting','epic composition','minimalist','gritty texture','watercolor','oil painting','abstract','photorealistic','manga style','storybook illustration','steampunk','noir','pastel colors','retro futurism','gothic','expressionism','impressionism','cubism','modernism','baroque','rococo','pointillism','pop art','low poly','art deco','film noir','hazy atmosphere','neon','glitch art','fantasy','space opera','urban street art','art nouveau','macro photography','monochrome','silk screen','vector art','graffiti','dreamlike','apocalyptic','metaphysical','kinetic','photobash','tattoo art style','stained glass','decorative','ornamental','analog horror','claymation','toy photography style','cinematic','zen','mystical','gloomy','vivid','thermal imaging look','crosshatching','etched','silk screen','isometric view','dappled light','moonlit','crystalline textures','soft pastels','weathered look','deep shadows','oversaturated colors','underwater effects','sun flare','antique','metallic sheen','reflective surfaces','night vision','subdued tones','heat map colors','frosty appearance','oversized elements','tiny world','layered','morphing shapes','bokeh effect','silhouette against sunset','disintegration','radiant glow','sepia filter','Lomo effect','scratchboard','double exposure','selective coloring','aged film look','mirrored','candy colored','airbrushed finish','light trails','high key lighting','low key lighting','stippling','chalkboard effect','halftone','parchment texture','floral motifs','time-lapse effect','smoke effects','snow-covered','autumnal','spring bloom','thermal view','dystopian feel','solarized','luminous','shadow play','mystic aura','rustic charm','bioluminescent effects','hologram style','sliced view','geometric overlay','parallax effect','paper texture','chrome effect','pearlescent','comic book ink']
+
+
+num_touches = 3
+num_artists = 1
+
+def generate_prompt(subject: str) -> str:
+    """Generate a random prompt using the subject, a random medium,
+    a selection of random artists, and finishing touches."""
+    finishing_touches_gen = [random.choice(finishing_touches) for _ in range(num_touches)]
+    artists_gen = [random.choice(artists) for _ in range(num_artists)]
+    return f"a {random.choice(mediums)} of {subject} in the style of {', '.join(artists_gen)}, {', '.join(finishing_touches_gen)}"
+
+class Predictor:
+    def __init__(self):
+        self.pipe = self._load_model()
+
+    def _load_model(self):
+        model = DiffusionPipeline.from_pretrained("SimianLuo/LCM_Dreamshaper_v7")
+        # Load model onto CPU then move to MPS if available.
+        model.to(torch_device="cpu", torch_dtype=torch.float32).to('mps:0')
+        return model
+
+    def predict_from_file(self, prompt_file: str, width: int, height: int, steps: int, seed: int = None, continuous: bool = False):
+        with open(prompt_file, 'r') as file:
+            prompts = file.readlines()
+
+        while True:
+            for prompt in prompts:
+                prompt = prompt.strip()
+                output_path = self.predict(prompt, width, height, steps, seed)
+                print(f"Output image saved for '{prompt}' to: {output_path}")
+
+            if not continuous:
+                return
+
+    def predict(self, prompt: str, width: int, height: int, steps: int, seed: int = None, output_dir: str = None) -> str:
+        seed = seed or int.from_bytes(os.urandom(2), "big")
+        print(f"Using seed: {seed}")
+        torch.manual_seed(seed)
+
+        result = self.pipe(
+            prompt=prompt, width=width, height=height,
+            guidance_scale=8.0, num_inference_steps=steps,
+            num_images_per_prompt=1, lcm_origin_steps=50,
+            output_type="pil"
+        ).images[0]
+
+        return self._save_result(result, output_dir, prompt, seed)
+    
+    def _save_result(self, result, output_dir: str = None, prompt: str = None, seed: int = None) -> str:
+        if output_dir is None:
+            output_dir = "output"
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        timestamp = time.strftime("%Y%m%d-%H%M%S")
+        # Filename includes prompt, seed, and timestamp
+        output_path = os.path.join(output_dir, f"{prompt}-{seed}-{timestamp}.png")
+        result.save(output_path)
+        return output_path
+
+def main():
+    args = parse_args()
+    predictor = Predictor()
+
+    # If a prompt file is provided, use it.
+    if args.prompts:
+        predictor.predict_from_file(args.prompts, args.width, args.height, args.steps, args.seed, args.continuous)
+    # Batch mode:
+    elif args.batch:
+        # If no subject is provided but a prompt is provided, use that prompt repeatedly.
+        if args.subject is None:
+            if args.prompt is None:
+                print("Error: In batch mode without a subject, you must provide a prompt using --prompt.")
+                exit(1)
+            batch_folder = "output"
+            if not os.path.exists(batch_folder):
+                os.makedirs(batch_folder)
+            for i in range(args.count):
+                prompt = args.prompt  # use the same prompt
+                print(f"Using prompt batch {i+1}: {prompt}")
+                output_path = predictor.predict(prompt, args.width, args.height, args.steps, args.seed, output_dir=batch_folder)
+                print(f"Output image saved to: {output_path}")
+        else:
+            # If subject is provided, generate random prompts using the subject.
+            timestamp = time.strftime("%Y%m%d-%H%M%S")
+            batch_folder = os.path.join(".", f"{args.subject}_{timestamp}")
+            if not os.path.exists(batch_folder):
+                os.makedirs(batch_folder)
+            for i in range(args.count):
+                prompt = generate_prompt(args.subject)
+                print(f"Generated prompt {i+1}: {prompt}")
+                output_path = predictor.predict(prompt, args.width, args.height, args.steps, args.seed, output_dir=batch_folder)
+                print(f"Output image saved to: {output_path}")
+
+    # Single prompt mode
+    else:
+        if args.prompt is None:
+            print("Error: Provide a prompt (or use --batch/--prompts mode).")
+            exit(1)
+        output_path = predictor.predict(args.prompt, args.width, args.height, args.steps, args.seed)
+        print(f"Output image saved to: {output_path}")
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Generate images based on text prompts.")
+    parser.add_argument("prompt", type=str, nargs='?', help="A single text prompt for image generation.")
+    parser.add_argument("--prompts", type=str, help="A file containing text prompts for image generation, one per line.")
+    parser.add_argument("--width", type=int, default=512, help="The width of the generated image.")
+    parser.add_argument("--height", type=int, default=512, help="The height of the generated image.")
+    parser.add_argument("--steps", type=int, default=8, help="The number of inference steps.")
+    parser.add_argument("--seed", type=int, default=None, help="Seed for random number generation.")
+    parser.add_argument("--continuous", action='store_true', help="Enable continuous generation.")
+
+    # New arguments for batch random prompt generation
+    parser.add_argument("--batch", action='store_true', help="Enable batch mode to generate random prompts.")
+    parser.add_argument("--count", type=int, default=1, help="Number of random prompts to generate in batch mode.")
+    parser.add_argument("--subject", type=str, default=None, help="Subject for random prompt generation in batch mode.")
+    return parser.parse_args()
+
+if __name__ == "__main__":
+    main()

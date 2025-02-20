@@ -1,65 +1,94 @@
-# Run latent consistency models on your Mac
+# Image Generation Script Usage Instructions
 
-Latent consistency models (LCMs) are based on Stable Diffusion, but they can generate images much faster, needing only 4 to 8 steps for a good image (compared to 25 to 50 steps). [Simian Luo et al](https://arxiv.org/abs/2310.04378) released the first Stable Diffusion distilled model. It’s distilled from the Dreamshaper fine-tune by incorporating classifier-free guidance into the model’s input.
+This guide explains how to use the image generation script that leverages a diffusion model to generate images based on a text prompt. The script supports both single image generation and batch mode to produce multiple images with the same prompt.
 
-You can [run Latent Consistency Models in the cloud on Replicate](https://replicate.com/luosiallen/latent-consistency-model), but it's also possible to run it locally.
+---
 
 ## Prerequisites
 
-You’ll need:
+- Set up from here: https://replicate.com/blog/run-latent-consistency-model-on-mac
 
-- a Mac with an M1 or M2 chip
-- 16GB RAM or more
-- macOS 13.0 or higher
-- Python 3.10 or above
+## Command-Line Arguments
 
-## Install
+The script uses several command-line arguments to control its behavior:
 
-Run this to clone the repo:
+- `--prompt` (required):  
+  A single text prompt that describes the image you want to generate.
 
-    git clone https://github.com/replicate/latent-consistency-model.git
-    cd latent-consistency-model
+- `--width`:  
+  The width of the generated image in pixels.  
+  _Default:_ `512`
 
-Set up a virtualenv to install the dependencies:
+- `--height`:  
+  The height of the generated image in pixels.  
+  _Default:_ `512`
 
-    python3 -m pip install virtualenv
-    python3 -m virtualenv venv
+- `--steps`:  
+  The number of inference steps for the diffusion process.  
+  _Default:_ `8`
 
-Activate the virtualenv:
+- `--seed`:  
+  Seed for random number generation. If not provided, a random seed is generated.
 
-    source venv/bin/activate
+- `--count`:  
+  The number of times the prompt will be used to generate images in batch mode.  
+  _Default:_ `1`
 
-(You'll need to run this command again any time you want to run the script.)
+---
 
-Then, install the dependencies:
+## Usage Examples
 
-    pip install -r requirements.txt
+### 1. Generate batch from a Single Prompt
 
-## Run
+Run the following command to generate one image using your text prompt:
 
-The script will automatically download the [`SimianLuo/LCM_Dreamshaper_v7`](https://huggingface.co/SimianLuo/LCM_Dreamshaper_v7) (3.44 GB) and [safety checker](https://huggingface.co/CompVis/stable-diffusion-safety-checker) (1.22 GB) models from HuggingFace.
-
-```sh
-python main.py \
-  "a beautiful apple floating in outer space, like a planet" \
-  --steps 4 --width 512 --height 512
+```bash
+python single.py --prompt "A serene mountain landscape" --width 512 --height 512 --steps 4 --count 10
 ```
 
-You’ll see an output like this:
+### 2. Generate Multiple Images (Batch Mode) Random Prompts
 
-```sh
-Output image saved to: output/out-20231026-144506.png
-Using seed: 48404
-100%|███████████████████████████| 4/4 [00:00<00:00,  5.54it/s]
+To generate multiple images with the same prompt, specify the `--count` argument:
+
+```bash
+python3 batch.py --subject "A futuristic cityscape" --count 5 --width 512 --height 512 --steps 4 --batch
 ```
 
-## Options
+This command will generate 5 images with the prompt "A futuristic cityscape", and all images will be saved in the `output` folder.
 
-| Parameter     | Type  | Default | Description                                                   |
-|---------------|-------|---------|---------------------------------------------------------------|
-| prompt        | str   | N/A     | A text string for image generation.                           |
-| --width       | int   | 512     | The width of the generated image.                             |
-| --height      | int   | 512     | The height of the generated image.                            |
-| --steps       | int   | 8       | The number of inference steps.                                |
-| --seed        | int   | None    | Seed for random number generation.                            |
-| --continuous  | flag  | False   | Enable continuous generation.                                 |
+---
+
+## Output Details
+
+- **Output Directory:**  
+  All images from single.py are saved in the `output` directory.  
+  If the directory does not exist, it will be created automatically.
+
+- **Filename Format:**  
+  Each output image filename includes:
+  - A sanitized version of the prompt (spaces replaced with underscores)
+  - The seed used for random number generation
+  - A timestamp indicating when the image was generated
+
+---
+
+## Troubleshooting
+
+- **Model Access:**  
+  Ensure the diffusion model `"SimianLuo/LCM_Dreamshaper_v7"` is available and accessible.
+
+- **Dependency Issues:**  
+  If you encounter issues with dependencies, try updating or reinstalling the required packages.
+
+- **Hardware Configuration:**  
+  Confirm that your hardware (CPU, MPS, or GPU) is properly set up to run the script.
+
+---
+
+## License
+
+_Include any license information or additional notes here if needed._
+
+---
+
+By following these instructions, you can effectively generate images using your specified prompt, either as a single output or in batch mode. Enjoy exploring creative image generation!
